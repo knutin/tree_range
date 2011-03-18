@@ -1,0 +1,8 @@
+{application, tree_range, [
+    {description, "Range search"},
+    {vsn, "1"},
+    {modules, []},
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {env, []}
+]}.
