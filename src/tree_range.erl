@@ -40,6 +40,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -export([from_orddict/1, search/2, sample_data/0]).
+-export([run_bench/0, do_run_bench/3]).
 
 -type key()   :: {Low::term(), High::term()}.
 -type value() :: term().
@@ -163,3 +164,36 @@ search_test_() ->
      ?_assertEqual(not_found, search([], Tree)),
      ?_assertEqual(not_found, search({}, Tree))
     ].
+
+
+%%
+%% Benchmarks
+%%
+%% R:
+%% Data <- read.csv("results.csv")
+%% summary(Data)
+%% plot(Data)
+
+run_bench() ->
+    {Min, Max} = {1, 10000},
+
+    Tree = tree_range:from_orddict(tree_range:sample_data()),
+
+    Data = [{N, run_bench(N, Tree)} || N <- lists:seq(Min, Max)],
+    Data2 = [{"key", "time"} | Data],
+
+    file:write_file("results.csv",
+                    [io_lib:format("~p,~p~n", [A, B]) || {A, B} <- Data2]),
+
+    ok.
+
+run_bench(N, Tree) ->
+    {T, _} = timer:tc(?MODULE, do_run_bench, [1000, N, Tree]),
+    T.
+
+do_run_bench(0, _N, _Tree) ->
+    ok;
+
+do_run_bench(Rep, N, Tree) ->
+    tree_range:search(N, Tree),
+    do_run_bench(Rep-1, N, Tree).
